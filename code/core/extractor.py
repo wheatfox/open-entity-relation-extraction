@@ -87,7 +87,9 @@ class Extractor:
             *: bool，实体(True)，非实体(False)
         """
         # 候选实体词性列表
-        entity_postags = {'nh', 'ni', 'ns', 'nz', 'j'}
+        # entity_postags = {'nh', 'ni', 'ns', 'nz', 'j'}
+        # 增加v-动词、n-名词、p-介词
+        entity_postags = {'n', 'nh', 'ni', 'ns', 'nz', 'j', 'v', 'p'}
         if entry.postag in entity_postags:
             return True
         else:
