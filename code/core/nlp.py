@@ -2,7 +2,7 @@
 import jieba
 from ctypes import c_char_p
 
-from pyltp import SentenceSplitter, Postagger, NamedEntityRecognizer, Parser
+from pyltp import Segmentor, Postagger, NamedEntityRecognizer, Parser
 
 import os
 
@@ -26,6 +26,8 @@ class NLP:
         self.default_user_dict_dir = user_dict_dir
         self.default_model_dir = model_dir
         # 初始化分词器
+        self.segmentor = Segmentor()
+        self.segmentor.load(os.path.join(self.default_model_dir, "cws.model"))
         # pynlpir.open()  # 初始化分词器
         # 添加用户词典(法律文书大辞典与清华大学法律词典)，这种方式是添加进内存中，速度更快
         files = os.listdir(user_dict_dir)
@@ -66,16 +68,17 @@ class NLP:
             lemmas: list，分词结果
         """
         # 添加实体词典
-        if entity_postag:
-            for entity in entity_postag:
+        # if entity_postag:
+        #     for entity in entity_postag:
                 # pynlpir.nlpir.AddUserWord(c_char_p(entity.encode()))
-                jieba.add_word(entity)
+                # jieba.add_word(entity)
         # pynlpir.nlpir.AddUserWord(c_char_p('前任'.encode()))  # 单个用户词加入示例
         # pynlpir.nlpir.AddUserWord(c_char_p('习近平'.encode()))  # 单个用户词加入示例
         # 分词，不进行词性标注
         # lemmas = pynlpir.segment(sentence, pos_tagging=False)
-        lemmas = jieba.lcut(sentence)
+        # lemmas = jieba.lcut(sentence)
         # pynlpir.close()  # 释放
+        lemmas = list(self.segmentor.segment(sentence))
         return lemmas
 
     def postag(self, lemmas):
@@ -148,6 +151,7 @@ class NLP:
     def close(self):
         """关闭与释放nlp"""
         # pynlpir.close()
+        self.segmentor.release()
         self.postagger.release()
         self.recognizer.release()
         self.parser.release()
